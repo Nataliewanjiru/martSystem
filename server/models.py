@@ -2,8 +2,9 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declarative_base
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from flask_login import UserMixin
 from marshmallow import Schema, fields, ValidationError
+from marshmallow.decorators import  pre_load
+from uuid import uuid4
 
 #Initiates the database
 db = SQLAlchemy()
@@ -13,11 +14,33 @@ admin = Admin()
 Base = declarative_base()
 metadata = Base.metadata
 
-class User(db.Model):
+def get_uuid():
+    return uuid4().hex
+
+
+#User info
+class User(db.Model,Base):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True)
-    password = db.Column(db.String())
+    id = db.Column(db.String(36), primary_key=True, unique=True, default=lambda: str(uuid4()))
+    first_name = db.Column(db.String, nullable=False)
+    last_name = db.Column(db.String, nullable=False)
+    username = db.Column(db.String(80), nullable=False)
+    email = db.Column(db.String(345), unique=True, nullable=False)
+    phone_number = db.Column(db.String, nullable=False)
+    profile_picture_url = db.Column(db.String, nullable=True, default="")  
+    password = db.Column(db.String(128), nullable=False)
+    role = db.Column(db.String(20), default='user')
+
+
+    def __repr__(self):
+        return f"<User {self.username}>"
+    
+    @staticmethod
+    def generate_profile_picture_url(email, background_color="#3498db", text_color="#ffffff"):
+        # Generate a URL with initials, background color, and text color if no profile picture URL is provided
+        initials = "".join(part[0].upper() for part in email.split("@"))
+        return f"https://example.com/profile_pictures/{initials}.jpg?background={background_color}&text={text_color}"
+
     
     def is_authenticated(self):
         return True
@@ -27,7 +50,7 @@ class User(db.Model):
         return True
 
     def is_anonymous(self):
-        """False for users. True for anonymous users."""
+        """True for users. False for anonymous users."""
         return False
 
     def get_id(self):
@@ -37,19 +60,33 @@ class User(db.Model):
 
 
 class LoginSchema(Schema):
+    id = fields.Str(required=True)
+    first_name = fields.Str(required=True)
+    last_name = fields.Str(required=True)
+    email = fields.Str(required=True)
     username = fields.Str(required=True)
-    password = fields.Str(required=True)
+    phone_number=fields.Str(required=True)
+    profile_picture_url = fields.Str(required=True)
 
-    @postprocessor
-    def process_data(schema, data):
+  
+    @pre_load
+    def process_data(self, data, **kwargs):
+        required_fields = ['first_name', 'last_name', 'email', 'username', 'password']
+        missing_fields = [field for field in required_fields if field not in data or not data[field]]
+
+        if missing_fields:
+            raise ValidationError(f"Missing required fields: {', '.join(missing_fields)}")
+
         if not data['password']:
             raise ValidationError('Password cannot be empty')
+
+        if not data['email']:
+            raise ValidationError('Email cannot be empty')
 
 
 login_schema = LoginSchema()
 
-@admin.register(User)
-class UsersAdmin(ImportExportMixin, admin.ModelAdmin):
-    search_fields = ['username',]
-    list_display = ('username', 'is_staff', 'date_joined')  
+
+# Add User model to the admin panel
+admin.add_view(ModelView(User,db.session))
 
