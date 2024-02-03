@@ -1,10 +1,15 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declarative_base
+from flask import render_template
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from marshmallow import Schema, fields, ValidationError
 from marshmallow.decorators import  pre_load
 from uuid import uuid4
+import hashlib
+from pydenticon import generate_identicon
+
+
 
 #Initiates the database
 db = SQLAlchemy()
@@ -36,12 +41,16 @@ class User(db.Model,Base):
         return f"<User {self.username}>"
     
     @staticmethod
-    def generate_profile_picture_url(email, background_color="#3498db", text_color="#ffffff"):
-        # Generate a URL with initials, background color, and text color if no profile picture URL is provided
-        initials = "".join(part[0].upper() for part in email.split("@"))
-        return f"https://example.com/profile_pictures/{initials}.jpg?background={background_color}&text={text_color}"
+    def generate_profile_picture(email):
+        # Take only the first character of the email
+        email_hash = hashlib.md5(email.lower().encode('utf-8')).hexdigest()
 
+        # Construct the Gravatar URL
+        gravatar_url = f"https://www.gravatar.com/avatar/{email_hash}"
     
+        return gravatar_url
+     
+
     def is_authenticated(self):
         return True
         

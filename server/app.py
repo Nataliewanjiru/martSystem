@@ -25,6 +25,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 #initialize and configure the Flask-Admin extension
 admin.init_app(app)
+
 migrate = Migrate(app, db)
 db.init_app(app)
 
@@ -36,10 +37,15 @@ jwt = JWTManager(app)
 
 
 
-#deals with the login routes
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
+##deals with the login routes
+#login_manager = LoginManager()
+#login_manager.init_app(app)
+#login_manager.login_view = 'login'
+#
+@app.route('/')
+def index():
+    return "Welcome to our API"
+
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5003)
+    app.run(debug=True, port=5090)
