@@ -50,5 +50,8 @@ def index():
 def userProfile():
     return LoginSchema
 
+@app.route("/home")
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=5070)
