@@ -50,7 +50,7 @@ def index():
 def userProfile():
     return LoginSchema
 
-@app.route("/home")
+
 
 
 if __name__ == '__main__':
