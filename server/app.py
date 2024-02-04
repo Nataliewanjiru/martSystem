@@ -46,6 +46,9 @@ jwt = JWTManager(app)
 def index():
     return "Welcome to our API"
 
+@app.route('/profile')
+def userProfile():
+    return LoginSchema
 
 if __name__ == '__main__':
     app.run(debug=True, port=5070)
