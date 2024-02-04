@@ -7,8 +7,9 @@ from marshmallow import Schema, fields, ValidationError
 from marshmallow.decorators import  pre_load
 from uuid import uuid4
 import hashlib
-from pydenticon import generate_identicon
-
+from PIL import Image, ImageDraw, ImageFont
+from io import BytesIO
+import base64
 
 
 #Initiates the database
@@ -42,14 +43,27 @@ class User(db.Model,Base):
     
     @staticmethod
     def generate_profile_picture(email):
-        # Take only the first character of the email
-        email_hash = hashlib.md5(email.lower().encode('utf-8')).hexdigest()
-
-        # Construct the Gravatar URL
-        gravatar_url = f"https://www.gravatar.com/avatar/{email_hash}"
-    
-        return gravatar_url
-     
+        first_letter = email[0].upper()
+        # Create an image with a white background
+        image_size = (100, 100)
+        background_color = (255, 255, 255)
+        image = Image.new("RGB", image_size, background_color)
+        draw = ImageDraw.Draw(image)
+        font = ImageFont.load_default()
+        # Calculate text position to center it in the image
+        text_bbox = draw.textbbox((0, 0), first_letter, font=font)
+        text_position = (
+            (image_size[0] - text_bbox[2] - text_bbox[0]) // 2,
+            (image_size[1] - text_bbox[3] - text_bbox[1]) // 2
+        )
+        # Draw the first letter on the image
+        draw.text(text_position, first_letter, font=font, fill=(0, 0, 0))
+        # Convert image to base64 string
+        buffered = BytesIO()
+        image.save(buffered, format="PNG")
+        image_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+        # Return the data URL
+        return f"data:image/png;base64,{image_base64}"
 
     def is_authenticated(self):
         return True
