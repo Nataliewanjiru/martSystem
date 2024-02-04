@@ -46,6 +46,44 @@ jwt = JWTManager(app)
 def index():
     return "Welcome to our API"
 
+@app.route('/register' ,methods=['POST'])
+def register_user():
+  try:
+       data = request.get_json() 
+       if not data:
+           return jsonify({'error': 'Invalid JSON data'}), 400
+       
+       username = data.get('username')
+       first_name = data.get('first_name')
+       last_name = data.get('last_name')
+       email = data.get('email')
+       password = data.get('password')
+       phoneNumber=data.get("phoneNumber")
+   
+       # Check if the username is already taken
+       existing_user = User.query.filter_by(username=username).first()
+       if existing_user:
+           response = {'message': 'Username is already taken. Please choose another one.'}
+           return jsonify(response), 400
+      
+       userProfile=User.generate_profile_picture(email)
+
+       # Create a new user
+       hashed_password = generate_password_hash(password, method='sha256')
+       new_user = User(first_name=first_name,last_name=last_name,username=username,email=email, password=hashed_password,phone_number=phoneNumber,profile_picture_url=userProfile)
+   
+       # Add the new user to the database
+       db.session.add(new_user)
+       db.session.commit()
+   
+       response = {'message': 'Registration successful!'}
+       return jsonify(response)
+  except Exception as e:
+    print(e)
+    response = {"status": False,"msg": str(e)}
+    return jsonify(response), 500
+
+
 @app.route('/profile')
 def userProfile():
     return LoginSchema
