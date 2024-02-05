@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declarative_base
 from flask import render_template
-from flask_admin import Admin
+from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from marshmallow import Schema, fields, ValidationError
 from marshmallow.decorators import  pre_load
@@ -10,12 +10,14 @@ import hashlib
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import base64
+from flask_login import current_user
+
 
 
 #Initiates the database
 db = SQLAlchemy()
 #Initiates the admin side
-admin = Admin()
+admin = Admin(index_view=AdminIndexView(), template_mode='bootstrap3')
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -109,7 +111,12 @@ class LoginSchema(Schema):
 
 login_schema = LoginSchema()
 
+class AdminView(ModelView):
+    def is_accessible(self):
+        #checks if the current user is a manager
+        return current_user.is_authenticated and current_user.role == 'admin'
 
-# Add User model to the admin panel
-admin.add_view(ModelView(User,db.session))
+admin.add_view(AdminView(User, db.session))
+
+
 

@@ -1,13 +1,14 @@
 from models import *
 from dotenv import load_dotenv
 from flask_cors import CORS
-from flask import Flask,  render_template, request, jsonify,flash
+from flask import Flask,  render_template, request, jsonify, redirect, url_for
 from sqlalchemy import or_
-import datetime,os
+import os
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required,get_jwt_identity
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
+from datetime import timedelta
 
 app = Flask(__name__)
 CORS(app)
@@ -28,6 +29,8 @@ admin.init_app(app)
 
 migrate = Migrate(app, db)
 db.init_app(app)
+login_manager = LoginManager(app)
+login_manager.init_app(app)
 
 
 
@@ -37,14 +40,14 @@ jwt = JWTManager(app)
 
 
 
-##deals with the login routes
-#login_manager = LoginManager()
-#login_manager.init_app(app)
-#login_manager.login_view = 'login'
-#
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 @app.route('/')
 def index():
-    return "Welcome to our API"
+    return render_template('login.html')
 
 @app.route('/register' ,methods=['POST'])
 def register_user():
@@ -82,6 +85,49 @@ def register_user():
     print(e)
     response = {"status": False,"msg": str(e)}
     return jsonify(response), 500
+
+
+@app.route('/login',methods=['POST'])
+def login_user():
+    data = request.get_json()
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
+
+    if not ((username or email) and password):
+      return jsonify({'error': 'Invalid JSON data'}), 400  
+
+    user = User.query.filter(or_(User.username == username, User.email == email)).first()
+
+    if user and check_password_hash(user.password, password):
+        login_user(user)
+        access_token = create_access_token(identity=user.id, expires_delta=timedelta(hours=24))
+        return jsonify({'access_token': access_token,
+                        "userid":current_user.id}), 200
+    else:
+        return jsonify({'message': 'Invalid username,email or password'}), 401
+
+
+
+@app.route('/manager_login', methods=['GET', 'POST'])
+def manager_login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        # Check user credentials
+        user = User.query.filter_by(username=username, password=password).first()
+
+        if user and user.role == 'admin':
+            # Login successful for manager
+            # Redirect to the manager dashboard or AdminView
+            return redirect(url_for('admin.index'))
+
+    return render_template('admin_access_denied.html')
+
+@app.route('/admin/')
+def admin_dashboard():
+    return "Hello"
 
 
 @app.route('/profile')
