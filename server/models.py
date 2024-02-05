@@ -10,14 +10,14 @@ import hashlib
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import base64
-from flask_login import current_user
+from flask_login import current_user,UserMixin
 
 
 
 #Initiates the database
 db = SQLAlchemy()
 #Initiates the admin side
-admin = Admin(index_view=AdminIndexView(), template_mode='bootstrap3')
+admin = Admin( template_mode='bootstrap3')
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -27,7 +27,7 @@ def get_uuid():
 
 
 #User info
-class User(db.Model,Base):
+class User(UserMixin,db.Model,Base):
     __tablename__ = 'users'
     id = db.Column(db.String(36), primary_key=True, unique=True, default=lambda: str(uuid4()))
     first_name = db.Column(db.String, nullable=False)
@@ -66,22 +66,6 @@ class User(db.Model,Base):
         image_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
         # Return the data URL
         return f"data:image/png;base64,{image_base64}"
-
-    def is_authenticated(self):
-        return True
-        
-    def is_active(self):
-        """True if user account is active."""
-        return True
-
-    def is_anonymous(self):
-        """True for users. False for anonymous users."""
-        return False
-
-    def get_id(self):
-        """Returns the email field to satisfy Flask-Login's requirements."""
-        # `get_id` typically returns a unicode string representing the user ID.
-        return self.username
 
 
 class LoginSchema(Schema):

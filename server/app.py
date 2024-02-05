@@ -1,14 +1,15 @@
 from models import *
 from dotenv import load_dotenv
 from flask_cors import CORS
-from flask import Flask,  render_template, request, jsonify, redirect, url_for
+from flask import Flask,  render_template, request, jsonify, redirect, url_for,flash
 from sqlalchemy import or_
 import os
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required,get_jwt_identity
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, login_user, login_required, logout_user,current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
 from datetime import timedelta
+from form import *
 
 app = Flask(__name__)
 CORS(app)
@@ -42,12 +43,13 @@ jwt = JWTManager(app)
 
 
 @login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+def load_user(id):
+   return User.query.get(id)
 
 @app.route('/')
 def index():
-    return render_template('login.html')
+    form = LoginForm()
+    return render_template('login.html', title='Sign In', form=form)
 
 @app.route('/register' ,methods=['POST'])
 def register_user():
@@ -88,29 +90,32 @@ def register_user():
 
 
 @app.route('/login',methods=['POST'])
-def login_user():
-    data = request.get_json()
-    username = data.get('username')
-    email = data.get('email')
-    password = data.get('password')
-
-    if not ((username or email) and password):
-      return jsonify({'error': 'Invalid JSON data'}), 400  
-
-    user = User.query.filter(or_(User.username == username, User.email == email)).first()
-
-    if user and check_password_hash(user.password, password):
-        login_user(user)
-        access_token = create_access_token(identity=user.id, expires_delta=timedelta(hours=24))
-        return jsonify({'access_token': access_token,
-                        "userid":current_user.id}), 200
-    else:
-        return jsonify({'message': 'Invalid username,email or password'}), 401
+#def login_user():
+#    data = request.get_json()
+#    username = data.get('username')
+#    email = data.get('email')
+#    password = data.get('password')
+#
+#    if not ((username or email) and password):
+#      return jsonify({'error': 'Invalid JSON data'}), 400  
+#
+#    user = User.query.filter(or_(User.username == username, User.email == email)).first()
+#
+#    if user and check_password_hash(user.password, password):
+#        login_user(user)
+#        access_token = create_access_token(identity=user.id, expires_delta=timedelta(hours=24))
+#        return jsonify({'access_token': access_token,
+#                        "userid":current_user.id}), 200
+#    else:
+#        return jsonify({'message': 'Invalid username,email or password'}), 401
 
 
 
 @app.route('/manager_login', methods=['GET', 'POST'])
 def manager_login():
+    if current_user.is_authenticated:
+        return redirect(url_for('admin.index'))  
+
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -119,15 +124,19 @@ def manager_login():
         user = User.query.filter_by(username=username, password=password).first()
 
         if user and user.role == 'admin':
-            # Login successful for manager
-            # Redirect to the manager dashboard or AdminView
-            return redirect(url_for('admin.index'))
+            login_user(user)
+            flash('Logged in successfully.', 'success')
+            return redirect(url_for('admin.index'))  # Redirect to admin dashboard after successful login
+
+        flash('Login failed. Please check your username and password.', 'danger')
 
     return render_template('admin_access_denied.html')
 
-@app.route('/admin/')
-def admin_dashboard():
-    return "Hello"
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 
 @app.route('/profile')
