@@ -42,14 +42,10 @@ jwt = JWTManager(app)
 
 
 
-@login_manager.user_loader
-def load_user(id):
-   return User.query.get(id)
 
-@app.route('/')
-def index():
-    form = LoginForm()
-    return render_template('login.html', title='Sign In', form=form)
+
+
+
 
 @app.route('/register' ,methods=['POST'])
 def register_user():
@@ -89,54 +85,27 @@ def register_user():
     return jsonify(response), 500
 
 
-@app.route('/login',methods=['POST'])
-#def login_user():
-#    data = request.get_json()
-#    username = data.get('username')
-#    email = data.get('email')
-#    password = data.get('password')
-#
-#    if not ((username or email) and password):
-#      return jsonify({'error': 'Invalid JSON data'}), 400  
-#
-#    user = User.query.filter(or_(User.username == username, User.email == email)).first()
-#
-#    if user and check_password_hash(user.password, password):
-#        login_user(user)
-#        access_token = create_access_token(identity=user.id, expires_delta=timedelta(hours=24))
-#        return jsonify({'access_token': access_token,
-#                        "userid":current_user.id}), 200
-#    else:
-#        return jsonify({'message': 'Invalid username,email or password'}), 401
+@app.route('/user_login',methods=['POST'])
+def user_login():
+    data = request.get_json()
+    user_username = data.get('username')
+    user_email = data.get('email')
+    user_password = data.get('password')
+
+    if not ((user_username or user_email) and user_password):
+      return jsonify({'error': 'Invalid JSON data'}), 400  
+
+    user_info = User.query.filter(or_(User.username == user_username, User.email == user_email)).first()
+
+    if user_info and check_password_hash(user_info.password, user_password):
+        login_user(user_info)
+        access_token = create_access_token(identity=user_info.id, expires_delta=timedelta(hours=24))
+        return jsonify({'access_token': access_token,
+                        "userid":current_user.id}), 200
+    else:
+        return jsonify({'message': 'Invalid username,email or password'}), 401
 
 
-
-@app.route('/manager_login', methods=['GET', 'POST'])
-def manager_login():
-    if current_user.is_authenticated:
-        return redirect(url_for('admin.index'))  
-
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-
-        # Check user credentials
-        user = User.query.filter_by(username=username, password=password).first()
-
-        if user and user.role == 'admin':
-            login_user(user)
-            flash('Logged in successfully.', 'success')
-            return redirect(url_for('admin.index'))  # Redirect to admin dashboard after successful login
-
-        flash('Login failed. Please check your username and password.', 'danger')
-
-    return render_template('admin_access_denied.html')
-
-
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('index'))
 
 
 @app.route('/profile')
@@ -144,7 +113,7 @@ def userProfile():
     return LoginSchema
 
 
-
+from Adminroutes import *
 
 if __name__ == '__main__':
     app.run(debug=True, port=5070)
