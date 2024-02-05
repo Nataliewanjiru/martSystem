@@ -110,7 +110,7 @@ def user_login():
 
 @app.route('/profile')
 def userProfile():
-    return LoginSchema
+    return "Hello"
 
 
 from Adminroutes import *
