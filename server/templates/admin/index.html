@@ -1,5 +1,16 @@
-{% extends 'admin/master.html'%}
+{% extends 'admin/master.html' %}
+
 {% block body %}
-<p>Hello Admin</p>
-<a href="{{ url_for('logout') }}">Logout</a>
+    {% if current_user.is_authenticated %}
+        <p>Hello {{ current_user.name }}!</p>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+        <p>Redirecting to login...</p>
+        {% if request.endpoint != 'login' %}
+            {% set redirect_url = url_for('index') %}
+            <script>
+                window.location.href = "{{ redirect_url }}";
+            </script>
+        {% endif %}
+    {% endif %}
 {% endblock %}

@@ -1,13 +1,20 @@
 from app import *
+from flask_login import login_required
+
 
 #Loads the user_loader
 @login_manager.user_loader
 def load_user(id):
    return User.query.get(id)
 
+#Helps know the function for logging in
+login_manager.login_view = 'index'
+
 #Route for logging in as an Admin
 @app.route('/')
 def index():
+    if current_user.is_authenticated:
+     return redirect(url_for('admin.index'))  
     form = LoginForm()
     return render_template('login.html', title='Sign In', form=form)
 
@@ -35,6 +42,7 @@ def manager_login():
 
 #Logout function for the admin
 @app.route('/logout')
+@login_required
 def logout():
     logout_user()
     return redirect(url_for('index'))
