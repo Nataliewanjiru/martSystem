@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import {Link, useNavigate } from "react-router-dom";
 import swal from 'sweetalert';
+import Emailconfirmation from "./Emailconfirmation";
+import { createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup, updateProfile } from "firebase/auth";
 
 
 
@@ -32,7 +34,7 @@ const Register = () => {
                 icon: 'success',
               });
                     
-                    
+            <Emailconfirmation email ={email}/>     
             // Clear the form inputs after submission
             setFormData({
                 first_name: "",
