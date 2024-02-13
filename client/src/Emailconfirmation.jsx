@@ -1,50 +1,47 @@
-import React from 'react'
-import { createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup, updateProfile } from "firebase/auth";
+import React, { useEffect } from 'react';
 
-
-function Emailconfirmation({email}) {
-
+async function Emailconfirmation({ email }) {
     const url = 'https://rapidprod-sendgrid-v1.p.rapidapi.com/mail/send';
-const options = {
-	method: 'POST',
-	headers: {
-		'content-type': 'application/json',
-		'X-RapidAPI-Key': 'dd91de6d20mshc3665b7aac50046p1b5f16jsncfbcdb2c653f',
-		'X-RapidAPI-Host': 'rapidprod-sendgrid-v1.p.rapidapi.com'
-	},
-	body: {
-		personalizations: [
-			{
-				to: [
-					{
-						email: email
-					}
-				],
-				subject: 'Registration successful!'
-			}
-		],
-		from: {
-			email: 'martsystem@example.com'
-		},
-		content: [
-			{
-				type: 'text/plain',
-				value: "You're registration was successful login to explore the services.!"
-			}
-		]
-	}
-};
 
-try {
-	const response = fetch(url, options);
-	const result =  response.text();
-	console.log(result);
-} catch (error) {
-	console.error(error);
-}
-  return (
-    <div>Emailconfirmation</div>
-  )
+    const options = {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json',
+            'X-RapidAPI-Key': 'dd91de6d20mshc3665b7aac50046p1b5f16jsncfbcdb2c653f',
+            'X-RapidAPI-Host': 'rapidprod-sendgrid-v1.p.rapidapi.com'
+        },
+        body: JSON.stringify({
+            personalizations: [
+                {
+                    to: [
+                        {
+                            email: email
+                        }
+                    ],
+                    subject: 'Email Verification'
+                }
+            ],
+            from: {
+                email: 'natalieamazon16@example.com' // Replace with your sender email address
+            },
+            content: [
+                {
+                    type: 'text/plain',
+                    value: 'Hello, please verify your email!' // Customize the email body
+                }
+            ]
+        })
+    };
+
+    try {
+        const response = await fetch(url, options);
+        const result = await response.text();
+        console.log(result);
+    } catch (error) {
+        console.error(error);
+    }
+
+    return <div>Hello</div>;
 }
 
-export default Emailconfirmation
+export default Emailconfirmation;

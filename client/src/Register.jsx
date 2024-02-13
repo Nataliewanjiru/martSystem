@@ -3,7 +3,6 @@ import axios from "axios";
 import {Link, useNavigate } from "react-router-dom";
 import swal from 'sweetalert';
 import Emailconfirmation from "./Emailconfirmation";
-import { createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup, updateProfile } from "firebase/auth";
 
 
 
@@ -17,6 +16,7 @@ const Register = () => {
         password: "",
         phoneNumber:"",
     });
+    const [send,setSend]=useState(false)
 
     const { first_name, last_name,username, email, password, phoneNumber} = formData;
     
@@ -24,17 +24,17 @@ const Register = () => {
 
     const signUp = async (e) => {
         e.preventDefault();
+        setSend(true)
         
         try {
-            if(first_name,last_name,username,email,password,phoneNumber){
+            if (first_name && last_name && username && email && password && phoneNumber) {
             const response = await axios.post("http://127.0.0.1:5070/register", formData);
             swal({
                 title: 'Success',
-                text: 'User created successfully',
+                text: 'Please verify your email for complete registration',
                 icon: 'success',
               });
-                    
-            <Emailconfirmation email ={email}/>     
+                        
             // Clear the form inputs after submission
             setFormData({
                 first_name: "",
@@ -43,7 +43,7 @@ const Register = () => {
                 email: "",
                 password: "",
             });
-            navigate("/login")
+            navigate("/verification")
         }
         else{
             swal({
@@ -60,7 +60,7 @@ const Register = () => {
 
     return (
         <div className="signUpBody">
-       
+      
         <div className="sign-up-parent">
         <div className="sign-up-container">
         <h1>Create Account</h1>
