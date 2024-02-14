@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import axios from "axios";
 import {Link, useNavigate } from "react-router-dom";
 import swal from 'sweetalert';
-import Emailconfirmation from "./Emailconfirmation";
 
 
 
@@ -54,8 +53,13 @@ const Register = () => {
              }
 
         } catch (error) {
-            console.error(error.response.data);
-        }   
+            swal({
+                title: 'Error',
+                text: 'Please confirm or change the email or username',
+                icon: 'error',
+              });
+             }
+             
 };
 
     return (

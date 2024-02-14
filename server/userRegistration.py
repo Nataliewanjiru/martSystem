@@ -1,30 +1,35 @@
 from app import*
 from flask_mail import Mail, Message
 
-app.config['MAIL_SERVER']='sandbox.smtp.mailtrap.io'
-app.config['MAIL_PORT'] = 2525
-app.config['MAIL_USERNAME'] = 'b3655f12d7fcf1'
-app.config['MAIL_PASSWORD'] = 'bd0e3e3d02a4ff'
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
+#After development is done please give the following the right access
+app.config['MAIL_SERVER'] = os.environ.get("MAIL_SERVER")
+app.config['MAIL_PORT'] = int(os.environ.get("MAIL_PORT", 2525))
+app.config['MAIL_USERNAME'] = os.environ.get("MAIL_USERNAME")
+app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
+app.config['MAIL_USE_TLS'] = os.environ.get("MAIL_USE_TLS", 'True').lower() == 'true'
+app.config['MAIL_USE_SSL'] = os.environ.get("MAIL_USE_SSL", 'False').lower() == 'true'
 
 mail = Mail(app)
+print("MAIL_SERVER:", app.config['MAIL_SERVER'])
+print("MAIL_PORT:", app.config['MAIL_USE_SSL'])
+# ... (other prints/logs)
 
+#The verfifiaction token together with the email is stored in the users
 users = {}
 
 # Function to generate a verification token (JWT)
-def generate_verification_token(email):
+def generate_verification_token():
      token = secrets.token_urlsafe(32)
      return token
 
-
+#Send email to the user
 def send_verification_email(email, token):
     msg = Message('Verify Your Email', sender='your_email@example.com', recipients=[email])
     verification_url = f'http://localhost:5173/verification?token={token}'
     msg.body = f'Click the following link to verify your email: {verification_url}'
     mail.send(msg)
 
-
+#Route for regestering 
 @app.route('/register' ,methods=['POST'])
 def register_user():
   try:
@@ -56,7 +61,7 @@ def register_user():
        db.session.commit()
        
         # For simplicity, consider the email as the user identity
-       token = generate_verification_token(email)
+       token = generate_verification_token()
        users[email] = {'token': token, 'verified': False}
        send_verification_email(email, token)
 
@@ -69,21 +74,24 @@ def register_user():
        response = {"status": False,"msg": str(e)}
        return jsonify(response), 500
 
+#Route for verifying the user
 @app.route('/verify', methods=['POST'])
-@jwt_required()
 def verify_email():
     try:
+        print(users)
         data = request.get_json()
         token = data.get('token')
-        email = get_jwt_identity()
-        print("Received JSON Payload:", data)
+        print(users)
+        if not token:
+            return jsonify(message='Invalid request. Token is required.'), 400
 
-        if email in users and 'token' in users[email] and users[email]['token'] == token:
-            users[email]['verified'] = True
-            return jsonify(message=f'Thank you! Your email ({email}) has been verified.')
-        else:
-            return jsonify(message='Invalid verification token.'), 400
-    except KeyError:
-        return jsonify(message='Email not found in users.'), 400
+        # Loop through users to find the email associated with the token
+        for email, user_info in users.items():
+            print(users)
+            if 'token' in user_info and user_info['token'] == token:
+                user_info['verified'] = True
+                return jsonify(message=f'Thank you! Your email ({email}) has been verified.')
+
+        return jsonify(message='Invalid verification token.'), 400
     except Exception as e:
         return jsonify(message=f'Error during verification: {str(e)}'), 500
