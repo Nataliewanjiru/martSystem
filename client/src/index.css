@@ -1,0 +1,25 @@
+.dash-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.dash {
+  width: 20px; /* Adjust the width of your dashes */
+  height: 2px; /* Adjust the height of your dashes */
+  background-color: black; /* Set the color of your dashes */
+  margin-bottom: 5px; /* Adjust the spacing between dashes */
+}
+
+#dropdown-basic::after {
+  content: none;
+}
+#dropdown-basic {
+  background-color: transparent;
+  border: none;
+}
+.ml-auto{
+    font-weight: bold; /* Make the font bold */
+  }
+.nav-container{
+    padding:30px;
+}

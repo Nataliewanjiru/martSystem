@@ -4,6 +4,7 @@ import { Route, Routes,Navigate } from 'react-router-dom';
 import Register from './Register';
 import VerificationPage from './VerificationPage';
 import Login from './Login';
+import Appnavbar from './Navbar';
 
 function App() {
 
@@ -14,6 +15,7 @@ function App() {
     <Route path="/register" exact="true" element={<Register/>}/>
     <Route path="/login" exact="true" element={<Login/>}/>
     </Routes>
+    <Appnavbar/>
     </>
   )
 }
