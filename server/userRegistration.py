@@ -1,5 +1,7 @@
-from app import*
+from app import *
 from flask_mail import Mail, Message
+from flask import request, jsonify
+
 
 #After development is done please give the following the right access
 app.config['MAIL_SERVER'] = os.environ.get("MAIL_SERVER")
@@ -10,9 +12,8 @@ app.config['MAIL_USE_TLS'] = os.environ.get("MAIL_USE_TLS", 'True').lower() == '
 app.config['MAIL_USE_SSL'] = os.environ.get("MAIL_USE_SSL", 'False').lower() == 'true'
 
 mail = Mail(app)
-print("MAIL_SERVER:", app.config['MAIL_SERVER'])
-print("MAIL_PORT:", app.config['MAIL_USE_SSL'])
-# ... (other prints/logs)
+import secrets
+
 
 #The verfifiaction token together with the email is stored in the users
 users = {}
