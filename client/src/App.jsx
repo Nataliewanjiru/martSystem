@@ -5,6 +5,7 @@ import Register from './Register';
 import VerificationPage from './VerificationPage';
 import Login from './Login';
 import Appnavbar from './Navbar';
+import Sidebar from './Sidebar';
 
 function App() {
 
@@ -16,6 +17,7 @@ function App() {
     <Route path="/login" exact="true" element={<Login/>}/>
     </Routes>
     <Appnavbar/>
+    <Sidebar/>
     </>
   )
 }
