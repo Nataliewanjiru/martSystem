@@ -11,6 +11,9 @@ from flask_migrate import Migrate
 from form import *
 
 
+
+
+
 app = Flask(__name__)
 
 CORS(app)
@@ -58,6 +61,6 @@ def userProfile():
 from Adminroutes import *
 from userRegistration import *
 from userlogin import *
-
+from useroptions import *
 if __name__ == '__main__':
     app.run(debug=True, port=5070)

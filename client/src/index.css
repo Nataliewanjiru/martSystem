@@ -6,7 +6,7 @@
 .dash {
   width: 20px; /* Adjust the width of your dashes */
   height: 2px; /* Adjust the height of your dashes */
-  background-color: black; /* Set the color of your dashes */
+  background-color: blue; /* Set the color of your dashes */
   margin-bottom: 5px; /* Adjust the spacing between dashes */
 }
 
@@ -25,12 +25,26 @@
 }
 
 .flex-column{
-    border:1px solid grey;
-    padding:10%;
+    border:2px solid grey;
     text-align:center;
-    
+    margin-left: 0.2%;;
+    padding: 9.5%;
 }
 .flex-column a{
   text-decoration: none;
   color:black;
+   padding: 25%;
+   margin-left: 68%;
+}
+
+/*userpage */
+.userpage-child{
+  display: flex;
+  flex-grow: 1;
+  margin-top: 0.1%;
+}
+.userpage-separationline{
+  background-color: blue;
+  width:100%;
+  height: 1px;
 }
