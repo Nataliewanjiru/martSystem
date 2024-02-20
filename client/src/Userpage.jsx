@@ -4,11 +4,12 @@ import Middlebar from './Middlebar'
 import Selectionbar from './Selectionbar'
 import Appnavbar from './Navbar'
 import './index.css'
-import Geocode from 'react-geocoding';
+import maplibregl from 'maplibre-gl';
 import { useState,useRef,useEffect } from 'react'
 import * as maptilersdk from '@maptiler/sdk';
 import '@maptiler/sdk/dist/maptiler-sdk.css';
 import './App.css';
+//import MapboxGeolocateControl from '@mapbox/mapbox-gl-geolocate-control';
 import { GeocodingControl } from "@maptiler/geocoding-control/maplibregl";
 
 
@@ -21,28 +22,44 @@ function Userpage() {
   const apiKey = 'JtiBf6AAQoLwnsi1NH8q';
   maptilersdk.config.apiKey = 'JtiBf6AAQoLwnsi1NH8q';
   const [map, setMap] = useState(null)
+ 
 
-  useEffect(() => {
-    const newMap = new maptilersdk.Map({
-      container: mapContainer.current,
-      style: maptilersdk.MapStyle.STREETS,
-      center: [nairobi.lng, nairobi.lat],
-      zoom: zoom,
-    }
-    );
+useEffect(() => {
+    const initializeMap = async () => {
+      const newMap = new maptilersdk.Map({
+        container: mapContainer.current,
+        style: maptilersdk.MapStyle.STREETS,
+        center: [nairobi.lng, nairobi.lat],
+        zoom: zoom,
+      });
+
+
+      const geolocateControl = new maptilersdk.GeolocateControl({
+        positionOptions: {
+          enableHighAccuracy: true,
+        },
+        trackUserLocation: true,
+        showUserLocation: true,
+      });
     
-    setMap(newMap); 
+      // Add the geolocate control to the map
+      newMap.addControl(geolocateControl);
+      newMap.on('load', () => {
+        setMap(newMap) 
+      });
 
-    const gc = new GeocodingControl({ apiKey, maplibregl: maptilersdk });
-    map.addControl(gc);
 
-    return () => {
-      if (map) {
-        map.removeControl(gc);
-        map.remove();
-      }
+
     };
+
+    initializeMap();
   }, [nairobi.lng, nairobi.lat, zoom, apiKey]);
+
+  const handleFindLocationClick= () => {
+    if (map) {
+      map.flyTo({ center: map.getCenter(), zoom: 14 });
+    }
+  };
 
   return (
     <div className='userpage-parent'>
@@ -53,6 +70,7 @@ function Userpage() {
         <Middlebar mapContainer={mapContainer} />
         <Selectionbar apiKey={apiKey} map={map}/>
       </div>
+      <button onClick={handleFindLocationClick}>Find My Location</button>
     </div>
   );
 }
