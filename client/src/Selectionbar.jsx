@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import Location from './Location'
-import Locationmethod2 from './Locationmethod2'
+
 
 function Selectionbar({apiKey,map}) {
   
   return (
-    <>
+    <div className='selection-wrap'>
    <Location apiKey={apiKey} map={map}/>
-   </>
+   </div>
   )
 }
 

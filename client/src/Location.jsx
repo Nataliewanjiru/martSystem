@@ -18,15 +18,16 @@ useEffect(() => {
     map.removeControl(gc);
   };
 }
-}, [apiKey, map]);
-  
+}, [option1]);
+ 
+const handleFirstLocationInput=() => {
+setOption1(true)
+}
 
   return (
     <div>
-      <input
-        type="text"
-        placeholder="Enter location..."
-      />
+      <button>current location</button>
+      <button onClick={handleFirstLocationInput}>find location</button>
     </div>
   );
 };

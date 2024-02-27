@@ -5,7 +5,7 @@ import swal from 'sweetalert';
 
 
 
-function Login({ onLogin }) {
+function Login() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
