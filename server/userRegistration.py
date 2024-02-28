@@ -44,6 +44,7 @@ def register_user():
        email = data.get('email')
        password = data.get('password')
        phoneNumber=data.get("phoneNumber")
+       usertype =data.get("usertype")
    
        # Check if the username is already taken
        existing_user = User.query.filter_by(username=username).first()
@@ -55,8 +56,12 @@ def register_user():
 
        # Create a new user
        hashed_password = generate_password_hash(password, method='sha256')
-       new_user = User(first_name=first_name,last_name=last_name,username=username,email=email, password=hashed_password,phone_number=phoneNumber,profile_picture_url=userProfile)
-   
+       if usertype:
+         new_user = User(first_name=first_name,last_name=last_name,username=username,email=email, password=hashed_password,phone_number=phoneNumber,profile_picture_url=userProfile,role=usertype)  
+       else:
+         new_user = User(first_name=first_name,last_name=last_name,username=username,email=email, password=hashed_password,phone_number=phoneNumber,profile_picture_url=userProfile)   
+
+
        # Add the new user to the database
        db.session.add(new_user)
        db.session.commit()

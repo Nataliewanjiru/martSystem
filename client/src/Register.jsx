@@ -15,7 +15,7 @@ const Register = () => {
         password: "",
         phoneNumber:"",
     });
-    const [send,setSend]=useState(false)
+  
 
     const { first_name, last_name,username, email, password, phoneNumber} = formData;
     
@@ -23,7 +23,7 @@ const Register = () => {
 
     const signUp = async (e) => {
         e.preventDefault();
-        setSend(true)
+       
         
         try {
             if (first_name && last_name && username && email && password && phoneNumber) {
